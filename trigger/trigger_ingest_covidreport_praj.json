@@ -2,7 +2,7 @@
 	"name": "trigger_ingest_covidreport_praj",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
