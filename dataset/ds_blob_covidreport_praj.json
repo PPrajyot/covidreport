@@ -1,0 +1,24 @@
+{
+	"name": "ds_blob_covidreport_praj",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_blob_covidreport_praj",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "21 - population-by-age.tsv",
+				"container": "population"
+			},
+			"columnDelimiter": "\t",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

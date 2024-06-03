@@ -1,0 +1,25 @@
+{
+	"name": "trigger_ingest_covidreport_praj",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_ingest_population",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/population/blobs/21",
+			"blobPathEndsWith": ".tsv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/32ef494a-beee-4985-8cbd-4ffd21de1c70/resourceGroups/praj_snow_pract/providers/Microsoft.Storage/storageAccounts/blobcovidpraj",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
