@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adfpraj123"
+		},
+		"ls_blob_covidreport_praj_connectionString": {
+			"value": ""
+		},
+		"ls_gen2_covidreport_praj_accountKey": {
+			"value": ""
+		},
+		"ls_casedeath_data_http_properties_typeProperties_url": {
+			"value": "https://github.com"
+		},
+		"ls_gen2_covidreport_praj_properties_typeProperties_url": {
+			"value": "https://gen2covidpraj.dfs.core.windows.net/"
+		},
+		"trigger_ingest_covidreport_praj_properties_typeProperties_scope": {
+			"value": "/subscriptions/32ef494a-beee-4985-8cbd-4ffd21de1c70/resourceGroups/praj_snow_pract/providers/Microsoft.Storage/storageAccounts/blobcovidpraj"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
