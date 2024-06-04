@@ -1,0 +1,19 @@
+{
+	"name": "ds_ecdc_file_list",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_blob_covidreport_praj",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "41 - githubusercontent-ecdc-file-list.json",
+				"container": "population"
+			}
+		},
+		"schema": {}
+	}
+}
