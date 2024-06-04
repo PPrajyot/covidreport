@@ -1,16 +1,24 @@
 {
-	"name": "ds_ingest_casedeath_data_load_http",
+	"name": "ds_ingest_ecdc_data_load_http",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_gen2_covidreport_praj",
 			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"para_sink_filename": {
+				"type": "string"
+			}
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "case_death.csv",
+				"fileName": {
+					"value": "@dataset().para_sink_filename",
+					"type": "Expression"
+				},
 				"folderPath": "ecdc",
 				"fileSystem": "raw"
 			},

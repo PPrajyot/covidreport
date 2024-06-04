@@ -1,16 +1,24 @@
 {
-	"name": "ds_ingest_casedeath_data_source_http",
+	"name": "ds_ingest_ecdc_data_source_http",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_casedeath_data_http",
 			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"para_source_relativeURL": {
+				"type": "string"
+			}
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "HttpServerLocation",
-				"relativeUrl": "cloudboxacademy/covid19/main/ecdc_data/cases_deaths.csv"
+				"relativeUrl": {
+					"value": "@dataset().para_source_relativeURL",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
