@@ -26,14 +26,6 @@
 		"trigger_ingest_covidreport_praj_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/32ef494a-beee-4985-8cbd-4ffd21de1c70/resourceGroups/praj_snow_pract/providers/Microsoft.Storage/storageAccounts/blobcovidpraj"
-		},
-		"trigger_ingest_hospitaladd_praj_properties_pl_ingest_ecdc_data_parameters_plpara_source_relativeURL": {
-			"type": "string",
-			"defaultValue": "cloudboxacademy/covid19/main/ecdc_data/hospital_admissions.csv"
-		},
-		"trigger_ingest_hospitaladd_praj_properties_pl_ingest_ecdc_data_parameters_plpara_sink_filename": {
-			"type": "string",
-			"defaultValue": "hospital_admission.csv"
 		}
 	},
 	"variables": {
@@ -211,6 +203,30 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_casedeath_data_http')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_ecdc_file_list')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_covidreport_praj",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "41 - githubusercontent-ecdc-file-list.json",
+						"container": "population"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_blob_covidreport_praj')]"
 			]
 		},
 		{
@@ -417,8 +433,8 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "cp_act_ecdc_data",
-						"type": "Copy",
+						"name": "act_lkup_ecdclist_file",
+						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -430,76 +446,122 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "DelimitedTextSource",
+								"type": "JsonSource",
 								"storeSettings": {
-									"type": "HttpReadSettings",
-									"requestMethod": "GET"
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
+									"type": "JsonReadSettings"
 								}
 							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "ds_ingest_ecdc_data_source_http",
+							"dataset": {
+								"referenceName": "ds_ecdc_file_list",
 								"type": "DatasetReference",
-								"parameters": {
-									"para_source_relativeURL": {
-										"value": "@pipeline().parameters.plpara_source_relativeURL",
-										"type": "Expression"
-									}
-								}
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "act_forech_for_eachfile",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "act_lkup_ecdclist_file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
-						"outputs": [
-							{
-								"referenceName": "ds_ingest_ecdc_data_load_http",
-								"type": "DatasetReference",
-								"parameters": {
-									"para_sink_filename": {
-										"value": "@pipeline().parameters.plpara_sink_filename",
-										"type": "Expression"
-									}
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('act_lkup_ecdclist_file').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "cp_act_ecdc_data",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "HttpReadSettings",
+												"requestMethod": "GET"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_ingest_ecdc_data_source_http",
+											"type": "DatasetReference",
+											"parameters": {
+												"para_source_relativeURL": {
+													"value": "@item().sourceRelativeURL",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_ingest_ecdc_data_load_http",
+											"type": "DatasetReference",
+											"parameters": {
+												"para_sink_filename": {
+													"value": "@item().sinkFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									]
 								}
-							}
-						]
+							]
+						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"parameters": {
-					"plpara_source_relativeURL": {
-						"type": "string"
-					},
-					"plpara_sink_filename": {
-						"type": "string"
-					}
-				},
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_ecdc_file_list')]",
 				"[concat(variables('factoryId'), '/datasets/ds_ingest_ecdc_data_source_http')]",
 				"[concat(variables('factoryId'), '/datasets/ds_ingest_ecdc_data_load_http')]"
 			]
@@ -536,7 +598,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/trigger_ingest_hospitaladd_praj')]",
+			"name": "[concat(parameters('factoryName'), '/trigger_ingest_ecdc_data')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -548,10 +610,7 @@
 							"referenceName": "pl_ingest_ecdc_data",
 							"type": "PipelineReference"
 						},
-						"parameters": {
-							"plpara_source_relativeURL": "[parameters('trigger_ingest_hospitaladd_praj_properties_pl_ingest_ecdc_data_parameters_plpara_source_relativeURL')]",
-							"plpara_sink_filename": "[parameters('trigger_ingest_hospitaladd_praj_properties_pl_ingest_ecdc_data_parameters_plpara_sink_filename')]"
-						}
+						"parameters": {}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -559,7 +618,7 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2024-06-04T11:54:00",
+						"startTime": "2024-06-04T15:10:00",
 						"timeZone": "India Standard Time",
 						"schedule": {}
 					}

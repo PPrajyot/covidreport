@@ -20,12 +20,6 @@
 		"trigger_ingest_covidreport_praj_properties_typeProperties_scope": {
 			"value": "/subscriptions/32ef494a-beee-4985-8cbd-4ffd21de1c70/resourceGroups/praj_snow_pract/providers/Microsoft.Storage/storageAccounts/blobcovidpraj"
 		},
-		"trigger_ingest_hospitaladd_praj_properties_pl_ingest_ecdc_data_parameters_plpara_source_relativeURL": {
-			"value": "cloudboxacademy/covid19/main/ecdc_data/hospital_admissions.csv"
-		},
-		"trigger_ingest_hospitaladd_praj_properties_pl_ingest_ecdc_data_parameters_plpara_sink_filename": {
-			"value": "hospital_admission.csv"
-		},
 		"containerUri": {
 			"value": ""
 		},
