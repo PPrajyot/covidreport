@@ -1,0 +1,67 @@
+{
+	"name": "df_transform_casesdeath_data",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "df_raw_cases_deaths",
+						"type": "DatasetReference"
+					},
+					"name": "casedeathsource"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "filterEuroonly"
+				},
+				{
+					"name": "selectonlyreqfields"
+				},
+				{
+					"name": "pivotcounts"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          country as string,",
+				"          country_code as string,",
+				"          continent as string,",
+				"          population as integer,",
+				"          indicator as string,",
+				"          daily_count as short,",
+				"          date as date,",
+				"          rate_14_day as double,",
+				"          source as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> casedeathsource",
+				"casedeathsource filter(continent == 'Europe' && not (isNull(country_code))) ~> filterEuroonly",
+				"filterEuroonly select(mapColumn(",
+				"          country,",
+				"          country_code,",
+				"          population,",
+				"          indicator,",
+				"          daily_count,",
+				"          source,",
+				"          each(match(name == 'date'),",
+				"               'reported_' + 'date' = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> selectonlyreqfields",
+				"selectonlyreqfields pivot(groupBy(country,",
+				"          country_code,",
+				"          population,",
+				"          source,",
+				"          reported_date),",
+				"     pivotBy(indicator, ['confirmed_cases', 'deaths']),",
+				"     count = sum(daily_count),",
+				"     columnNaming: '$V_$N',",
+				"     lateral: true) ~> pivotcounts"
+			]
+		}
+	}
+}
