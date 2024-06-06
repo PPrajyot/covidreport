@@ -70,7 +70,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> countrylookup",
-				"casedeathsource filter(continent == 'Europe' && not (isNull(country_code))) ~> filterEuroonly",
+				"casedeathsource filter(continent == 'Europe' && not(isNull(country_code))) ~> filterEuroonly",
 				"filterEuroonly select(mapColumn(",
 				"          country,",
 				"          country_code,",
